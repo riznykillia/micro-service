@@ -41,10 +41,10 @@ void MicroserviceController::initRestOpHandlers() {
 void MicroserviceController::handleGet(http_request message) {
     auto path = requestPath(message);
     if (!path.empty()) {
-        if (path[0] == "service" && path[1] == "test") {
+        if (path[0] == U("service") && path[1] == U("test")) {
             auto response = json::value::object();
-            response["version"] = json::value::string("0.1.1");
-            response["status"] = json::value::string("ready!");
+            response[U("version")] = json::value::string(U("0.1.1"));
+            response[U("status")] = json::value::string(U("ready!"));
             message.reply(status_codes::OK, response);
         }
     }
@@ -91,7 +91,7 @@ void MicroserviceController::handleMerge(http_request message) {
 
 json::value MicroserviceController::responseNotImpl(const http::method & method) {
     auto response = json::value::object();
-    response["serviceName"] = json::value::string("C++ Mircroservice Sample");
-    response["http_method"] = json::value::string(method);
+    response[U("serviceName")] = json::value::string(U("C++ Mircroservice Sample"));
+    response[U("http_method")] = json::value::string(method);
     return response ;
 }

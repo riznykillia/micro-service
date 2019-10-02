@@ -22,7 +22,20 @@ if(UNIX) # Darwing or Linux
     endif()
 
 elseif(WIN32) # Windows systems including Win64.
-    message(FATAL_ERROR "-- Windows is not supported for now.")
+    macro(get_WIN32_WINNT version)
+        if (WIN32 AND CMAKE_SYSTEM_VERSION)
+            set(ver ${CMAKE_SYSTEM_VERSION})
+            string(REPLACE "." "" ver ${ver})
+            string(REGEX REPLACE "([0-9])" "0\\1" ver ${ver})
+    
+            set(${version} "0x${ver}")
+        endif()
+    endmacro()
+
+    get_WIN32_WINNT(ver)
+    add_definitions(-D_WIN32_WINNT=${ver})
+
+    find_package(cpprestsdk CONFIG REQUIRED)
 else()
     message(FATAL_ERROR "-- Unsupported platform sorry! :( ")
 endif()
@@ -62,7 +75,7 @@ if(APPLE)
     set(ZIP_LIBRARY "/usr/local/Cellar/zlib/1.2.11/lib/libz.dylib")
 
     set(LIBRARIES_SEARCH_PATHS ${OPENSSL_LIBS} ${Boost_LIBRARIES} ${CPPRESTSDK_LIBRARY} ${ZIP_LIBRARY})
-else()
+elseif(UNIX)
     set(OPENSSL_LIBS "${OPENSSL_LIBRARIES}")
     set(CPPRESTSDK_LIBRARY "${PROJECT_SOURCE_DIR}/libs/cpprestsdk/build.release/Binaries/libcpprest.a")
 
@@ -80,6 +93,8 @@ if (APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework Security")
     target_link_libraries(${PROJECT_NAME} ${LIBRARIES_SEARCH_PATHS})
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-W1, -F/Library/Frameworks")
-else()
+elseif(UNIX)
     target_link_libraries(${PROJECT_NAME} ${LIBRARIES_SEARCH_PATHS})
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE cpprestsdk::cpprest)	
 endif()
